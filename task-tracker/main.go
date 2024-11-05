@@ -59,6 +59,8 @@ func runCommand(cmd string) {
 		updateTaskStatus()
 	case "list":
 		listTask()
+	case "list-by-status":
+		listTaskByStatus()
 	case "exit":
 		os.Exit(0)
 	default:
@@ -147,7 +149,7 @@ func addTask() {
 	saveTask(tasks)
 
 	fmt.Println("Task Created\n")
-	showTask(task.ID)
+	showTaskById(task.ID)
 }
 
 func updateTaskStatusbyId(taskId int, status Status) ([]Task, error) {
@@ -208,7 +210,7 @@ func updateTaskStatus() {
 		fmt.Println(err)
 	}
 	saveTask(tasks)
-	showTask(taskId)
+	showTaskById(taskId)
 	return
 }
 
@@ -237,7 +239,7 @@ func updateTask() {
 	}
 	saveTask(task)
 	fmt.Println("New description has been updated\n")
-	showTask(taskId)
+	showTaskById(taskId)
 	return
 
 }
@@ -291,10 +293,39 @@ func listTask() {
 	}
 }
 
-func showTask(taskId int) {
+func showTaskById(taskId int) {
 	tasks := getTasks()
 	for i, task := range tasks {
 		if taskId == tasks[i].ID {
+			fmt.Printf("ID: %d\n", task.ID)
+			fmt.Printf("Description: %s\n", task.Description)
+			fmt.Printf("Status: %s\n", task.Status)
+			fmt.Printf("Created At: %s\n", task.CreatedAt.Format(time.RFC3339))
+			fmt.Printf("Updated At: %s\n", task.UpdatedAt.Format(time.RFC3339))
+			fmt.Println("----------------------")
+		}
+	}
+
+}
+
+func listTaskByStatus() {
+	var status Status
+	tasks := getTasks()
+
+	scanner := bufio.NewScanner(os.Stdin)
+	scanner.Scan()
+	rgx, err := regexp.MatchString(`\s*\b(todo|in-progress|done)\b\s*`, string(scanner.Bytes()))
+	if err != nil {
+		fmt.Println("Please enter valid status (todo | in-progress | done)")
+		return
+	}
+	if !rgx {
+		fmt.Println("Please enter valid status (todo | in-progress | done)")
+	}
+	status = Status(scanner.Text())
+
+	for _, task := range tasks {
+		if task.Status == status {
 			fmt.Printf("ID: %d\n", task.ID)
 			fmt.Printf("Description: %s\n", task.Description)
 			fmt.Printf("Status: %s\n", task.Status)
