@@ -30,7 +30,7 @@ func main() {
 
 func initDB(db *pgxpool.Pool) {
 
-	err := db.Ping(context.Background())
+	err := db.Ping(context.TODO())
 	if err != nil {
 		log.Fatalf("Unable to connect to database %v", err)
 	}
