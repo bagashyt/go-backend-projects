@@ -2,6 +2,7 @@ package internal
 
 import (
 	"context"
+	"log"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -19,6 +20,7 @@ func NewStore(db *pgxpool.Pool) *Store {
 func (s *Store) CreateBlog(blog BlogPost) error {
 	_, err := s.db.Exec(context.TODO(), "INSERT INTO blogs (title, content, category, tags, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?)", blog.Title, blog.Content, blog.Category, blog.Tags, blog.CreatedAt, blog.UpdatedAt)
 	if err != nil {
+		log.Panicf(err.Error())
 		return err
 	}
 
@@ -26,12 +28,11 @@ func (s *Store) CreateBlog(blog BlogPost) error {
 }
 
 func (s *Store) GetBlogById(id int) (*BlogPost, error) {
-	rows, err := s.db.Query(context.TODO(), "SELECT * FROM blogs WHERE id = ?", id)
+	rows, err := s.db.Query(context.TODO(), "SELECT * FROM blogs WHERE blog_id = $1", id)
 	if err != nil {
+		log.Panicf(err.Error())
 		return nil, err
 	}
-
-	defer rows.Close()
 
 	b := new(BlogPost)
 	for rows.Next() {
@@ -49,10 +50,9 @@ func (s *Store) GetBlogs() ([]*BlogPost, error) {
 	query := `SELECT * FROM blogs`
 	rows, err := s.db.Query(context.TODO(), query)
 	if err != nil {
+		log.Panicf(err.Error())
 		return nil, err
 	}
-
-	defer rows.Close()
 
 	blogs := make([]*BlogPost, 0)
 	for rows.Next() {
@@ -80,6 +80,7 @@ func scanRowIntoBlog(rows pgx.Rows) (*BlogPost, error) {
 		&blog.UpdatedAt,
 	)
 	if err != nil {
+		log.Panicf(err.Error())
 		return nil, err
 	}
 

@@ -19,7 +19,5 @@ func NewPostgresStorage(cfg string) (*pgxpool.Pool, error) {
 		return nil, err
 	}
 
-	defer dbpool.Close()
-
 	return dbpool, nil
 }
