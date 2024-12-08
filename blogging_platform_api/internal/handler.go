@@ -2,6 +2,7 @@ package internal
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"strconv"
 
@@ -12,11 +13,6 @@ import (
 type Handler struct {
 	store BlogStore
 }
-
-var (
-	w http.ResponseWriter
-	r *http.Request
-)
 
 func NewHandler(store BlogStore) *Handler {
 	return &Handler{store: store}
@@ -29,6 +25,7 @@ func (h *Handler) BlogRoutes(router *gin.RouterGroup) {
 	{
 		blogs.GET("/", h.handleGetBlogs)
 		blogs.GET("/:id", h.handleGetBlogById)
+		blogs.POST("/", h.handleCreateBlog)
 	}
 
 }
@@ -39,12 +36,10 @@ func (h *Handler) handleGetBlogs(c *gin.Context) {
 	if err != nil {
 
 		utils.WriteError(c, http.StatusInternalServerError, err)
-		// c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
 	utils.WriteJSON(c, http.StatusOK, blogs)
-	// c.JSON(http.StatusOK, blogs)
 	return
 }
 
@@ -66,18 +61,20 @@ func (h *Handler) handleGetBlogById(c *gin.Context) {
 	utils.WriteJSON(c, http.StatusOK, blog)
 }
 
-// func (h *Handler) handleCreateBlog(w http.ResponseWriter, r *http.Request) {
-// 	var blog BlogPost
-// 	if err := utils.ParseJSON(r, &blog); err != nil {
-// 		// utils.WriteError(w, http.StatusBadRequest, err)
-// 		return
-// 	}
+func (h *Handler) handleCreateBlog(c *gin.Context) {
+	var blog BlogPost
+	if err := utils.ParseJSON(c, &blog); err != nil {
+		log.Fatalf(err.Error())
+		utils.WriteError(c, http.StatusBadRequest, err)
+		return
+	}
 
-// 	err := h.store.CreateBlog(blog)
-// 	if err != nil {
-// 		// utils.WriteError(w, http.StatusInternalServerError, err)
-// 		return
-// 	}
+	err := h.store.CreateBlog(blog)
+	if err != nil {
+		log.Fatalf(err.Error())
+		utils.WriteError(c, http.StatusInternalServerError, err)
+		return
+	}
 
-// 	//utils.WriteJSON(w, http.StatusCreated, blog)
-// }
+	utils.WriteJSON(c, http.StatusCreated, blog)
+}

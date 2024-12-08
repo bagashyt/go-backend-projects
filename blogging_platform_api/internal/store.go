@@ -18,9 +18,9 @@ func NewStore(db *pgxpool.Pool) *Store {
 }
 
 func (s *Store) CreateBlog(blog BlogPost) error {
-	_, err := s.db.Exec(context.TODO(), "INSERT INTO blogs (title, content, category, tags, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?)", blog.Title, blog.Content, blog.Category, blog.Tags, blog.CreatedAt, blog.UpdatedAt)
+	_, err := s.db.Exec(context.TODO(), "INSERT INTO blogs (title, content, category, tags, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6)", blog.Title, blog.Content, blog.Category, blog.Tags, blog.CreatedAt, blog.UpdatedAt)
 	if err != nil {
-		log.Panicf(err.Error())
+		log.Fatalf("Unable to create Blog error: %s", err)
 		return err
 	}
 
@@ -30,7 +30,7 @@ func (s *Store) CreateBlog(blog BlogPost) error {
 func (s *Store) GetBlogById(id int) (*BlogPost, error) {
 	rows, err := s.db.Query(context.TODO(), "SELECT * FROM blogs WHERE blog_id = $1", id)
 	if err != nil {
-		log.Panicf(err.Error())
+		log.Fatalf("Unable to Get Blog by ID error: %s", err)
 		return nil, err
 	}
 
@@ -50,7 +50,7 @@ func (s *Store) GetBlogs() ([]*BlogPost, error) {
 	query := `SELECT * FROM blogs`
 	rows, err := s.db.Query(context.TODO(), query)
 	if err != nil {
-		log.Panicf(err.Error())
+		log.Fatalf("Unable to Get Blogs error: %s", err)
 		return nil, err
 	}
 
