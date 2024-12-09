@@ -28,15 +28,15 @@ func (s *Store) CreateBlog(blog BlogPost) error {
 }
 
 func (s *Store) GetBlogById(id int) (*BlogPost, error) {
-	rows, err := s.db.Query(context.TODO(), "SELECT * FROM blogs WHERE blog_id = $1", id)
+	row, err := s.db.Query(context.TODO(), "SELECT * FROM blogs WHERE blog_id = $1", id)
 	if err != nil {
-		log.Fatalf("Unable to Get Blog by ID error: %s", err)
+		log.Fatalf("Unable to Get Blog by ID, error: %s", err)
 		return nil, err
 	}
 
 	b := new(BlogPost)
-	for rows.Next() {
-		b, err = scanRowIntoBlog(rows)
+	for row.Next() {
+		b, err = scanRowIntoBlog(row)
 		if err != nil {
 			return nil, err
 		}
@@ -80,7 +80,7 @@ func scanRowIntoBlog(rows pgx.Rows) (*BlogPost, error) {
 		&blog.UpdatedAt,
 	)
 	if err != nil {
-		log.Panicf(err.Error())
+		log.Fatalf(err.Error())
 		return nil, err
 	}
 

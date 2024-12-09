@@ -27,9 +27,8 @@ func (s *APIServer) Run() error {
 	blogStore := internal.NewStore(s.db)
 	blogHandler := internal.NewHandler(blogStore)
 	subrouter := router.Group("/api/v1")
-	{
-		blogHandler.BlogRoutes(subrouter)
-	}
+
+	blogHandler.BlogRoutes(subrouter)
 
 	log.Println("Listening on", s.addr)
 
